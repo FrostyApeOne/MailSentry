@@ -1,0 +1,222 @@
+{
+  "version": 1,
+  "signatures": [
+    {
+      "id": "prize-urgency",
+      "name": "Prize/urgency scam pattern",
+      "score": 7,
+      "when": {
+        "all": [
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "you won",
+              "your prize",
+              "claim your prize",
+              "free gift",
+              "free emergency kit",
+              "prize is reserved"
+            ]
+          },
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "expires in 24 hours",
+              "expires today",
+              "claim now",
+              "act now",
+              "last chance",
+              "reserved"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "fedex-rewards",
+      "name": "Fake FedEx reward campaign",
+      "score": 7,
+      "when": {
+        "all": [
+          {
+            "field": "senderDomain",
+            "operator": "startsWith",
+            "value": "--"
+          },
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "fedex"
+            ]
+          },
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "claim your reward",
+              "reward is waiting",
+              "reward package"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "festival-prize",
+      "name": "Festival prize campaign",
+      "score": 7,
+      "when": {
+        "all": [
+          {
+            "field": "senderDomain",
+            "operator": "startsWith",
+            "value": "--"
+          },
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "glastonbury",
+              "festival tickets"
+            ]
+          },
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "claim your prize",
+              "you have won",
+              "you won"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "solar-grant",
+      "name": "Solar grant campaign",
+      "score": 7,
+      "when": {
+        "all": [
+          {
+            "field": "senderDomain",
+            "operator": "startsWith",
+            "value": "--"
+          },
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "solar grant",
+              "solar funding"
+            ]
+          },
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "claim now",
+              "act now",
+              "expires today"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "housing-compensation",
+      "name": "Housing compensation campaign",
+      "score": 7,
+      "when": {
+        "all": [
+          {
+            "field": "senderDomain",
+            "operator": "startsWith",
+            "value": "--"
+          },
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "housing compensation",
+              "housing disrepair"
+            ]
+          },
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "claim now",
+              "claim your compensation",
+              "expires today"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cash4gold",
+      "name": "Cash4Gold campaign",
+      "score": 7,
+      "when": {
+        "all": [
+          {
+            "field": "senderDomain",
+            "operator": "startsWith",
+            "value": "--"
+          },
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "cash4gold"
+            ]
+          },
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "claim now",
+              "reward",
+              "limited-time"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "survival-prize",
+      "name": "Survival prize campaign",
+      "score": 7,
+      "when": {
+        "all": [
+          {
+            "field": "senderDomain",
+            "operator": "startsWith",
+            "value": "--"
+          },
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "survival kit",
+              "emergency kit"
+            ]
+          },
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "claim your prize",
+              "prize is reserved",
+              "you won"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

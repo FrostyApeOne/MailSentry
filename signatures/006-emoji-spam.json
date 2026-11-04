@@ -1,0 +1,74 @@
+{
+    "version":  1,
+    "signatures":  [
+                       {
+                           "id":  "spam-emoji",
+                           "name":  "Campaign emoji in sender or subject",
+                           "score":  5,
+                           "when":  {
+                                        "any":  [
+                                                    {
+                                                        "field":  "senderName",
+                                                        "operator":  "containsAny",
+                                                        "values":  [
+                                                                       "\ud83d\udea8",
+                                                                       "\ud83c\udf81",
+                                                                       "\ud83c\udfc6",
+                                                                       "\ud83d\udcb0",
+                                                                       "\ud83d\udd25",
+                                                                       "\ud83c\udf89",
+                                                                       "\ud83d\udca5",
+                                                                       "\ud83d\udc8e",
+                                                                       "\ud83d\udce9",
+                                                                       "\u26a0",
+                                                                       "\ud83e\udd79",
+                                                                       "\ud83e\udef6",
+                                                                       "\ud83d\udea9",
+                                                                       "\u2757"
+                                                                   ]
+                                                    },
+                                                    {
+                                                        "field":  "senderAddress",
+                                                        "operator":  "containsAny",
+                                                        "values":  [
+                                                                       "\ud83d\udea8",
+                                                                       "\ud83c\udf81",
+                                                                       "\ud83c\udfc6",
+                                                                       "\ud83d\udcb0",
+                                                                       "\ud83d\udd25",
+                                                                       "\ud83c\udf89",
+                                                                       "\ud83d\udca5",
+                                                                       "\ud83d\udc8e",
+                                                                       "\ud83d\udce9",
+                                                                       "\u26a0",
+                                                                       "\ud83e\udd79",
+                                                                       "\ud83e\udef6",
+                                                                       "\ud83d\udea9",
+                                                                       "\u2757"
+                                                                   ]
+                                                    },
+                                                    {
+                                                        "field":  "subject",
+                                                        "operator":  "containsAny",
+                                                        "values":  [
+                                                                       "\ud83d\udea8",
+                                                                       "\ud83c\udf81",
+                                                                       "\ud83c\udfc6",
+                                                                       "\ud83d\udcb0",
+                                                                       "\ud83d\udd25",
+                                                                       "\ud83c\udf89",
+                                                                       "\ud83d\udca5",
+                                                                       "\ud83d\udc8e",
+                                                                       "\ud83d\udce9",
+                                                                       "\u26a0",
+                                                                       "\ud83e\udd79",
+                                                                       "\ud83e\udef6",
+                                                                       "\ud83d\udea9",
+                                                                       "\u2757"
+                                                                   ]
+                                                    }
+                                                ]
+                                    }
+                       }
+                   ]
+}

@@ -1,0 +1,172 @@
+{
+  "version": 1,
+  "signatures": [
+    {
+      "id": "glp-miracle",
+      "name": "GLP-1 miracle weight-loss campaign",
+      "score": 8,
+      "when": {
+        "all": [
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "glp-1"
+            ]
+          },
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "burns 45",
+              "viral drink",
+              "10-second recipe",
+              "no shots"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "mens-performance",
+      "name": "Men's performance miracle-remedy campaign",
+      "score": 7,
+      "when": {
+        "field": "content",
+        "operator": "containsAny",
+        "values": [
+          "blue pills",
+          "shower hack",
+          "men's performance",
+          "mens performance"
+        ]
+      }
+    },
+    {
+      "id": "health-generated",
+      "name": "Health-product campaign from generated sender",
+      "score": 5,
+      "when": {
+        "all": [
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "wellness support",
+              "new level of vitality",
+              "limited-time opportunity",
+              "performance wire",
+              "blue pills",
+              "viral drink",
+              "glp-1"
+            ]
+          },
+          {
+            "any": [
+              {
+                "field": "senderDomain",
+                "operator": "startsWith",
+                "value": "--"
+              },
+              {
+                "field": "senderAddress",
+                "operator": "regex",
+                "value": "^(?=[^@]*[a-z])(?=[^@]*[0-9])[a-z0-9]{7,16}@"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "miracle-treatment",
+      "name": "Miracle-treatment marketing pattern",
+      "score": 7,
+      "when": {
+        "all": [
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "ointment trick",
+              "clears lungs fast",
+              "doctor's trick",
+              "dr.'s trick",
+              "otc trick",
+              "14-second",
+              "10-second recipe",
+              "miracle remedy"
+            ]
+          },
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "pulmonary",
+              "lungs",
+              "health",
+              "wellness",
+              "performance"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "performance-generated",
+      "name": "Men's performance campaign from generated sender",
+      "score": 7,
+      "when": {
+        "all": [
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "blue pills",
+              "shower hack",
+              "men's performance",
+              "mens performance",
+              "staying soft",
+              "size shrinking",
+              "erectile",
+              "performance problem"
+            ]
+          },
+          {
+            "any": [
+              {
+                "field": "senderDomain",
+                "operator": "startsWith",
+                "value": "--"
+              },
+              {
+                "field": "senderAddress",
+                "operator": "regex",
+                "value": "^(?=[^@]*[a-z])(?=[^@]*[0-9])[a-z0-9]{7,16}@"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "health-remedy",
+      "name": "Health/remedy marketing pattern",
+      "score": 5,
+      "when": {
+        "field": "content",
+        "operator": "containsAny",
+        "values": [
+          "nerve pain",
+          "joint pain",
+          "pain relief",
+          "japanese recipe",
+          "ancient recipe",
+          "doctor's secret",
+          "natural remedy",
+          "neuropathy"
+        ]
+      }
+    }
+  ]
+}

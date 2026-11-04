@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "signatures": [
+    {
+      "id": "cloud-billing",
+      "name": "Cloud/storage + billing/deletion scam pattern",
+      "score": 8,
+      "when": {
+        "all": [
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "cloud storage",
+              "your files",
+              "your photos",
+              "storage is full",
+              "cloud security"
+            ]
+          },
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "payment declined",
+              "payment failed",
+              "billing notification",
+              "files will be deleted",
+              "will be deleted within",
+              "payment method was declined"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "subscription-failure",
+      "name": "Subscription payment-failure pattern",
+      "score": 5,
+      "when": {
+        "all": [
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "payment-declined",
+              "payment declined",
+              "payment failed",
+              "failed to renew"
+            ]
+          },
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "membership",
+              "subscription",
+              "account",
+              "renew"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "membership-generated",
+      "name": "Membership/reward offer from generated sender",
+      "score": 6,
+      "when": {
+        "all": [
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "last chance to renew",
+              "renew your membership",
+              "exclusive rewards",
+              "membership expires"
+            ]
+          },
+          {
+            "any": [
+              {
+                "field": "senderDomain",
+                "operator": "startsWith",
+                "value": "--"
+              },
+              {
+                "field": "senderAddress",
+                "operator": "regex",
+                "value": "^(?=[^@]*[a-z])(?=[^@]*[0-9])[a-z0-9]{7,16}@"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "high-importance",
+      "name": "High importance supporting signal",
+      "score": 1,
+      "when": {
+        "field": "importance",
+        "operator": "equals",
+        "value": "high"
+      }
+    }
+  ]
+}

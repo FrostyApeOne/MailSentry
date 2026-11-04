@@ -1,0 +1,20 @@
+name: Build and test
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      # Intentionally no local appsettings.json, tokens or mailbox access.
+      - run: dotnet build MailSentry.sln --configuration Release
+      - run: dotnet test MailSentry.sln --configuration Release --no-build
+      - run: dotnet list MailSentry.sln package --vulnerable --include-transitive
+      - shell: pwsh
+        run: ./scripts/Publish-Windows.ps1

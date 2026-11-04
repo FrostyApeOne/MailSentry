@@ -1,0 +1,142 @@
+﻿{
+  "version": 1,
+  "signatures": [
+    {
+      "id": "casino",
+      "name": "casino",
+      "score": 5,
+      "when": {
+        "field": "content",
+        "operator": "containsAny",
+        "values": [
+          "casino"
+        ]
+      }
+    },
+    {
+      "id": "free-spins",
+      "name": "free spins",
+      "score": 5,
+      "when": {
+        "field": "content",
+        "operator": "containsAny",
+        "values": [
+          "free spins"
+        ]
+      }
+    },
+    {
+      "id": "deposit-bonus",
+      "name": "deposit bonus",
+      "score": 5,
+      "when": {
+        "field": "content",
+        "operator": "containsAny",
+        "values": [
+          "deposit bonus"
+        ]
+      }
+    },
+    {
+      "id": "welcome-bonus",
+      "name": "welcome bonus",
+      "score": 4,
+      "when": {
+        "field": "content",
+        "operator": "containsAny",
+        "values": [
+          "welcome bonus"
+        ]
+      }
+    },
+    {
+      "id": "casino-bonus",
+      "name": "casino bonus",
+      "score": 5,
+      "when": {
+        "field": "content",
+        "operator": "containsAny",
+        "values": [
+          "casino bonus"
+        ]
+      }
+    },
+    {
+      "id": "live-dealer",
+      "name": "live dealer",
+      "score": 4,
+      "when": {
+        "field": "content",
+        "operator": "containsAny",
+        "values": [
+          "live dealer"
+        ]
+      }
+    },
+    {
+      "id": "player-rewards",
+      "name": "Gambling/reward campaign pattern",
+      "score": 6,
+      "when": {
+        "all": [
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "player rewards",
+              "first-time player",
+              "first deposit",
+              "deposit match",
+              "welcome package",
+              "bonus offers",
+              "reward package"
+            ]
+          },
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "deposit bonus",
+              "rewards",
+              "deposit",
+              "claim",
+              "spins"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "gambling-luck",
+      "name": "Gambling luck/deposit pattern",
+      "score": 7,
+      "when": {
+        "all": [
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "lucky day",
+              "get lucky",
+              "your luck",
+              "hidden treasure",
+              "congratulations"
+            ]
+          },
+          {
+            "field": "content",
+            "operator": "containsAny",
+            "values": [
+              "deposit",
+              "free spins",
+              "welcome package",
+              "deposit bonus",
+              "casino",
+              "jackpot"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
