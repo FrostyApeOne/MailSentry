@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "signatures": [
+    {
+      "id": "financial-brand-sender-name-lookalike",
+      "name": "Obfuscated financial brand in sender name (supporting evidence)",
+      "score": 4,
+      "when": {
+        "any": [
+          { "field": "senderName", "operator": "confusableContains", "value": "paypal" },
+          { "field": "senderName", "operator": "confusableContains", "value": "revolut" },
+          { "field": "senderName", "operator": "confusableContains", "value": "monzo" },
+          { "field": "senderName", "operator": "confusableContains", "value": "barclays" },
+          { "field": "senderName", "operator": "confusableContains", "value": "hsbc" },
+          { "field": "senderName", "operator": "confusableContains", "value": "santander" },
+          { "field": "senderName", "operator": "confusableContains", "value": "lloyds" },
+          { "field": "senderName", "operator": "confusableContains", "value": "natwest" },
+          { "field": "senderName", "operator": "confusableContains", "value": "nationwide" },
+          { "field": "senderName", "operator": "confusableContains", "value": "starling" },
+          { "field": "senderName", "operator": "confusableContains", "value": "chase" },
+          { "field": "senderName", "operator": "confusableContains", "value": "capital one" }
+        ]
+      }
+    }
+  ]
+}

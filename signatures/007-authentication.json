@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "signatures": [
+    {
+      "id": "corroborated-email-authentication-failure",
+      "name": "Microsoft reports DMARC failure with SPF/DKIM failure (supporting evidence)",
+      "score": 3,
+      "when": {
+        "all": [
+          { "field": "dmarc", "operator": "equals", "value": "fail" },
+          {
+            "any": [
+              { "field": "spf", "operator": "equals", "value": "fail" },
+              { "field": "spf", "operator": "equals", "value": "softfail" },
+              { "field": "dkim", "operator": "equals", "value": "fail" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

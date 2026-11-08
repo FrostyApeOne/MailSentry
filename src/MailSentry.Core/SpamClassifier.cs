@@ -8,6 +8,15 @@ namespace MailSentry;
 public sealed record MailMessage(string Id, string SenderName, string SenderAddress, string Subject,
     string BodyPreview, DateTimeOffset? ReceivedDateTime = null, string Importance = "normal")
 {
+    public MailAuthenticationResults Authentication { get; init; } = MailAuthenticationResults.Unknown;
+    public string SenderNameSkeleton
+    {
+        get { try { return SenderNameAnalysis.Skeleton(SenderName); } catch (ArgumentException) { return ""; } }
+    }
+    public bool SenderNameHasConfusables
+    {
+        get { try { return SenderNameAnalysis.HasConfusables(SenderName); } catch (ArgumentException) { return false; } }
+    }
     public string SenderDomain => SenderAddress.LastIndexOf('@') is var at && at > 0 && at < SenderAddress.Length - 1
         ? SenderAddress[(at + 1)..].Trim().ToLowerInvariant() : "";
 }
@@ -68,13 +77,18 @@ public static class SignatureFormat
                 Validate(children[i], depth + 1, $"{path}.{(c.All != null ? "all" : "any")}[{i}]");
             return;
         }
-        if (c.Field is not ("senderName" or "senderAddress" or "senderDomain" or "subject" or "body" or "content" or "importance")) throw new InvalidDataException("Unsupported field.");
-        if (c.Operator is not ("contains" or "containsAny" or "containsAll" or "startsWith" or "endsWith" or "equals" or "regex")) throw new InvalidDataException("Unsupported operator.");
+        if (c.Field is not ("senderName" or "senderAddress" or "senderDomain" or "subject" or "body" or "content" or "importance" or "spf" or "dkim" or "dmarc")) throw new InvalidDataException("Unsupported field.");
+        if (c.Operator is not ("contains" or "containsAny" or "containsAll" or "startsWith" or "endsWith" or "equals" or "regex" or "confusableEquals" or "confusableContains")) throw new InvalidDataException("Unsupported operator.");
         if (c.Operator is "containsAny" or "containsAll")
         {
             if (c.Value != null || c.Values is not { Count: > 0 and <= 100 } || c.Values.Any(v => string.IsNullOrWhiteSpace(v) || v.Length > 2000)) throw new InvalidDataException($"{path}: operator '{c.Operator}' on field '{c.Field}' requires a nonempty 'values' array (up to 100 nonblank strings, each at most 2000 characters) and no 'value' property.");
         }
         else if (c.Values != null || string.IsNullOrWhiteSpace(c.Value) || c.Value.Length > 2000) throw new InvalidDataException($"{path}: operator '{c.Operator}' on field '{c.Field}' requires a single nonblank 'value' string (at most 2000 characters), not a 'values' array.");
+        if (c.Operator is "confusableEquals" or "confusableContains")
+        {
+            if (c.Field != "senderName" || c.Value!.Trim().Length < 3 || !Regex.IsMatch(c.Value, @"\A[a-zA-Z0-9][a-zA-Z0-9 .&'-]{2,99}\z", RegexOptions.CultureInvariant))
+                throw new InvalidDataException($"{path}: confusable operators require 'senderName' and a 3–100 character Latin brand 'value'.");
+        }
         if (c.Operator == "regex")
         {
             var regex = new Regex(c.Value!, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(50));
@@ -89,6 +103,9 @@ public static class SignatureFormat
     {
         if (c.All != null) return c.All.All(x => Matches(x, m));
         if (c.Any != null) return c.Any.Any(x => Matches(x, m));
+        if (c.Operator is "confusableEquals" or "confusableContains")
+            return c.Field == "senderName" && SenderNameAnalysis.Matches(m.SenderName, c.Value!, c.Operator == "confusableContains");
+        var authentication = m.Authentication ?? MailAuthenticationResults.Unknown;
         var text = Normalize(c.Field switch
         {
             "senderName" => m.SenderName,
@@ -97,6 +114,9 @@ public static class SignatureFormat
             "subject" => m.Subject,
             "body" => m.BodyPreview,
             "importance" => m.Importance,
+            "spf" => authentication.IsProviderResult ? authentication.Spf : "unknown",
+            "dkim" => authentication.IsProviderResult ? authentication.Dkim : "unknown",
+            "dmarc" => authentication.IsProviderResult ? authentication.Dmarc : "unknown",
             "content" => $"{m.SenderName} {m.Subject} {m.BodyPreview}",
             _ => ""
         });
@@ -155,7 +175,7 @@ public sealed class SpamClassifier(MailSentryOptions options)
         {
             foreach (var rule in rules) if (SignatureFormat.Matches(rule.When, m)) { score = checked(score + rule.Score); reasons.Add(rule.Name); }
         }
-        catch (Exception e) when (e is RegexMatchTimeoutException or OverflowException)
+        catch (Exception e) when (e is RegexMatchTimeoutException or OverflowException or ArgumentException)
         { return new(Classification.Review, 0, ["Signature evaluation failed safely"]); }
         return new(score >= options.SpamThreshold ? Classification.Spam : Classification.Review, score, reasons);
     }

@@ -56,6 +56,8 @@ The rename retains the existing local DryRun setting, quarantine folder name, an
 
 `SpamThreshold` must be at least 7. Exact sender/domain allow lists precede all scoring. Domains match exactly, including no implicit subdomains. Broad brand domains are not automatically trusted; From addresses can be spoofed. The maximum scan batch defaults to 500; messages beyond the limit wait for a later scan.
 
+MailSentry also reads Microsoft's SPF/DKIM/DMARC results and detects common Unicode lookalikes in financial-brand sender names. Bundled packs `007-authentication.json` and `008-financial-impersonation.json` add supporting scores; neither signal alone reaches the default SPAM threshold. No address, including your own, is automatically blocked. Unmatched Junk and copied exports include safe authentication results and lookalike comparison text. Existing stored messages acquire authentication evidence on their next scan. See [signature fields, examples and detection limits](docs/signatures.md).
+
 ## Operational console
 
 - Dashboard: account management, masked per-mailbox status, last successful scans, aggregate statistics, partial-success results, signature count and Scan Now. Each mailbox also has **Wipe quarantine mails**, which previews and confirms moving its quarantine contents to Deleted Items, respecting global DryRun.

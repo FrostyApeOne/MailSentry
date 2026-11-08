@@ -18,9 +18,15 @@ public sealed class GraphMailboxSession(Guid accountId, string microsoftUserId, 
     {
         try
         {
-            return (await _reader.GetJunkMessagesAsync(maximum, ct)).Select(m => new AccountMailMessage(AccountId,
-                new(m.Id ?? "", m.From?.EmailAddress?.Name ?? "", m.From?.EmailAddress?.Address ?? "", m.Subject ?? "",
-                    m.BodyPreview ?? "", m.ReceivedDateTime, m.Importance?.ToString() ?? "normal"))).ToArray();
+            return (await _reader.GetJunkMessagesAsync(maximum, ct)).Select(m =>
+            {
+                var message = new MailMessage(m.Id ?? "", m.From?.EmailAddress?.Name ?? "", m.From?.EmailAddress?.Address ?? "", m.Subject ?? "",
+                    m.BodyPreview ?? "", m.ReceivedDateTime, m.Importance?.ToString() ?? "normal");
+                return new AccountMailMessage(AccountId, message with
+                {
+                    Authentication = MicrosoftAuthenticationResults.Read(m.InternetMessageHeaders, message.SenderDomain)
+                });
+            }).ToArray();
         }
         catch (Exception e) when (e is AuthenticationRequiredException or AuthenticationFailedException) { throw new MailboxAuthenticationException(); }
         catch (ApiException e) when (e.ResponseStatusCode == 401) { throw new MailboxAuthenticationException(); }

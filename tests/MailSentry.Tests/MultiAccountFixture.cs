@@ -26,6 +26,7 @@ public sealed class MultiAccountFixture : IDisposable
     public int? FailCleanupAfter { get; set; }
     public int CleanupMoves { get; private set; }
     public Dictionary<string, string> GraphIdentityOverrides { get; } = [];
+    public Dictionary<string, string> JunkResponseOverrides { get; } = [];
     public MultiAccountFixture()
     {
         Directory.CreateDirectory(SignaturePath); Store = new(DirectoryPath); Accounts = new(Store); Signatures = new(SignaturePath);
@@ -68,7 +69,8 @@ public sealed class MultiAccountFixture : IDisposable
             if (fixture.AuthFailures.Contains(home)) return Response(HttpStatusCode.Unauthorized, "{\"error\":{\"code\":\"InvalidAuthenticationToken\",\"message\":\"synthetic-token-never-log\"}}");
             if (path.EndsWith("/me")) return Response(HttpStatusCode.OK, JsonSerializer.Serialize(new { id = fixture.GraphIdentityOverrides.GetValueOrDefault(home, "graph-" + home), mail = "synthetic@example.invalid" }));
             if (fixture.GraphFailures.Contains(home)) return Response(HttpStatusCode.Forbidden, "{\"error\":{\"code\":\"ErrorAccessDenied\",\"message\":\"synthetic-private-error\"}}");
-            if (path.EndsWith("/junkemail/messages")) return Response(HttpStatusCode.OK, "{\"value\":[{\"id\":\"same-id\",\"subject\":\"synthetic spam\",\"from\":{\"emailAddress\":{\"address\":\"sender@example.invalid\"}}},{\"id\":\"review-id\",\"subject\":\"uncertain\"}]}");
+            if (path.EndsWith("/junkemail/messages")) return Response(HttpStatusCode.OK, fixture.JunkResponseOverrides.GetValueOrDefault(home,
+                "{\"value\":[{\"id\":\"same-id\",\"subject\":\"synthetic spam\",\"from\":{\"emailAddress\":{\"address\":\"sender@example.invalid\"}}},{\"id\":\"review-id\",\"subject\":\"uncertain\"}]}"));
             var segments = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
             var folderPosition = Array.IndexOf(segments, "mailFolders");
             if (folderPosition >= 0 && segments.Length > folderPosition + 1)

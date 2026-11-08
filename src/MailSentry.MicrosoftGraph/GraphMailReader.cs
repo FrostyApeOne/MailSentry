@@ -26,7 +26,8 @@ public sealed class GraphMailReader(GraphServiceClient graphClient)
                     "from",
                     "receivedDateTime",
                     "bodyPreview",
-                    "importance"
+                    "importance",
+                    "internetMessageHeaders"
                 ];
 
                 config.QueryParameters.Orderby =

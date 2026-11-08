@@ -112,6 +112,9 @@ async function messages() {
     checkbox.type = 'checkbox'; checkbox.value = x.selectionKey; checkbox.name = 'message'; label.append(checkbox, document.createTextNode(' ' + x.message.subject));
     a.append(el('p', 'Mailbox: ' + x.mailbox + ' (' + x.accountId.slice(0, 8) + ')'), label,
       el('p', x.message.senderName + ' - ' + x.message.senderAddress), el('p', 'Score: ' + x.result.score), el('p', 'Matched: ' + (x.result.reasons.join(', ') || 'None')));
+    const auth = x.message.authentication;
+    a.append(el('p', auth ? `Email authentication: SPF ${auth.spf}; DKIM ${auth.dkim}; DMARC ${auth.dmarc} (${auth.source})` : 'Email authentication: unavailable. Scan again to collect results.'));
+    if (x.message.senderNameHasConfusables) a.append(el('p', 'Sender name contains lookalike or hidden characters. Comparison: ' + x.message.senderNameSkeleton));
     const preview = el('p', x.message.bodyPreview); preview.className = 'preview'; a.append(preview);
     a.append(action('Copy', () => copyMessages([x.selectionKey]))); $('messages').append(a);
   }

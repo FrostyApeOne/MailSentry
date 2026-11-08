@@ -6,6 +6,8 @@ The Web console always requires a unique admin password of at least 16 character
 
 New installations default to DryRun. Unknown or invalid signatures stop scoring safely. Trusted senders/domains take precedence. Quarantine cleanup requires preview and confirmation and moves current direct contents to Deleted Items; it never permanently deletes messages. Keep the quarantine folder dedicated to MailSentry.
 
+Email authentication evidence is accepted only from recognised Microsoft receiver header layouts above ingress; sender-supplied, ambiguous and unrecognised results supply no evidence. This relies on Microsoft transport headers and Graph preserving their order. MailSentry does not independently verify DKIM or perform SPF/DMARC DNS checks. Authentication failures can occur on legitimate forwarded mail, and passing authentication does not prove that a financial display name is authentic. The bundled rules require corroboration and leave either signal alone for review. Only finite result codes are retained: raw headers, sender IPs, diagnostics and authentication service identifiers are not stored, exported or logged. Unicode lookalike matching is opt-in for sender names and never changes address/domain allow-list comparisons. See [signature safety and limits](signatures.md).
+
 ## Before publishing source
 
 1. Run `git status --short` and inspect `git diff --cached` before committing. Include source, example configuration, signatures, docs and tests only. Ignore rules do not remove files already committed; inspect history if adding this to an existing repository.
