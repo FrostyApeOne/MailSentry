@@ -58,6 +58,8 @@ The rename retains the existing local DryRun setting, quarantine folder name, an
 
 MailSentry also reads Microsoft's SPF/DKIM/DMARC results and detects common Unicode lookalikes in financial-brand sender names. Bundled packs `007-authentication.json` and `008-financial-impersonation.json` add supporting scores; neither signal alone reaches the default SPAM threshold. No address, including your own, is automatically blocked. Unmatched Junk and copied exports include safe authentication results and lookalike comparison text. Existing stored messages acquire authentication evidence on their next scan. See [signature fields, examples and detection limits](docs/signatures.md).
 
+Signature loading reuses validated packs by content hash. Dashboard polls receive a compact cached summary; scans, previews and activation still verify current file contents, including edits that preserve timestamps. See [cache behavior and performance measurements](docs/signature-loading.md).
+
 ## Operational console
 
 - Dashboard: account management, masked per-mailbox status, last successful scans, aggregate statistics, partial-success results, signature count and Scan Now. Each mailbox also has **Wipe quarantine mails**, which previews and confirms moving its quarantine contents to Deleted Items, respecting global DryRun.

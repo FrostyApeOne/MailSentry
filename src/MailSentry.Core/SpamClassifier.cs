@@ -24,12 +24,14 @@ public sealed record SignaturePack(int Version, List<Signature> Signatures);
 public sealed record Signature(string Id, string Name, int Score, Condition When);
 public sealed class Condition
 {
-    public string? Field { get; set; }
-    public string? Operator { get; set; }
-    public string? Value { get; set; }
-    public List<string>? Values { get; set; }
-    public List<Condition>? All { get; set; }
-    public List<Condition>? Any { get; set; }
+    private readonly IReadOnlyList<string>? _values;
+    private readonly IReadOnlyList<Condition>? _all, _any;
+    public string? Field { get; init; }
+    public string? Operator { get; init; }
+    public string? Value { get; init; }
+    public IReadOnlyList<string>? Values { get => _values; init => _values = value is null ? null : Array.AsReadOnly(value.ToArray()); }
+    public IReadOnlyList<Condition>? All { get => _all; init => _all = value is null ? null : Array.AsReadOnly(value.ToArray()); }
+    public IReadOnlyList<Condition>? Any { get => _any; init => _any = value is null ? null : Array.AsReadOnly(value.ToArray()); }
 }
 public static class SignatureFormat
 {
@@ -39,7 +41,7 @@ public static class SignatureFormat
     {
         using var document = JsonDocument.Parse(json, new JsonDocumentOptions { MaxDepth = 24 });
         RejectDuplicateProperties(document.RootElement);
-        var pack = JsonSerializer.Deserialize<SignaturePack>(json, Json) ?? throw new InvalidDataException("Empty signature pack.");
+        var pack = document.RootElement.Deserialize<SignaturePack>(Json) ?? throw new InvalidDataException("Empty signature pack.");
         if (pack.Version != 1 || pack.Signatures is not { Count: > 0 and <= 1000 }) throw new InvalidDataException("Unsupported version or rule count.");
         var ids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var s in pack.Signatures)
@@ -132,35 +134,6 @@ public static class SignatureFormat
             "regex" => Regex.IsMatch(text, c.Value!, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(50)),
             _ => false
         };
-    }
-}
-public sealed record SignatureSnapshot(IReadOnlyList<Signature> Rules, IReadOnlyList<string> Files, IReadOnlyList<string> Errors);
-public sealed class SignatureRepository(string directory)
-{
-    public string DirectoryPath { get; } = Path.GetFullPath(directory);
-    public SignatureSnapshot Load()
-    {
-        var rules = new List<Signature>(); var files = new List<string>(); var errors = new List<string>();
-        var ids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        try
-        {
-            foreach (var file in Directory.GetFiles(DirectoryPath, "*.json").Order(StringComparer.Ordinal))
-            {
-                try
-                {
-                    if (new FileInfo(file).Length > 1024 * 1024) throw new InvalidDataException();
-                    var pack = SignatureFormat.Parse(File.ReadAllText(file));
-                    if (pack.Signatures.Any(s => ids.Contains(s.Id))) throw new InvalidDataException("Duplicate signature ID across packs.");
-                    foreach (var rule in pack.Signatures) { ids.Add(rule.Id); rules.Add(rule); }
-                    files.Add(Path.GetFileName(file));
-                }
-                catch (Exception e) when (e is JsonException or InvalidDataException or ArgumentException or IOException or UnauthorizedAccessException)
-                { errors.Add(e is InvalidDataException ? $"{Path.GetFileName(file)}: {e.Message}" : $"{Path.GetFileName(file)}: invalid signature pack ({e.GetType().Name})."); }
-            }
-        }
-        catch (Exception e) when (e is IOException or UnauthorizedAccessException) { errors.Add("Signature directory unavailable."); }
-        // A broken or ambiguous repository disables scoring for this snapshot.
-        return new(errors.Count == 0 ? rules : [], files, errors);
     }
 }
 public sealed class SpamClassifier(MailSentryOptions options)

@@ -13,16 +13,7 @@ public sealed class SignatureInstaller(SignatureRepository repository, Scanner s
 {
     private sealed record Pending(string FileName, string Json, string Fingerprint, DateTimeOffset Expires);
     private readonly Dictionary<string, Pending> _pending = [];
-    public string[] FileNames()
-    {
-        try
-        {
-            return Directory.GetFiles(repository.DirectoryPath, "*.json")
-                .Where(f => (File.GetAttributes(f) & FileAttributes.ReparsePoint) == 0)
-                .Select(Path.GetFileName).OfType<string>().Order(StringComparer.Ordinal).ToArray();
-        }
-        catch (Exception e) when (e is IOException or UnauthorizedAccessException) { return []; }
-    }
+    public string[] FileNames() => repository.Load().FileNames.ToArray();
 
     private string SavedPath(string fileName)
     {
@@ -57,16 +48,16 @@ public sealed class SignatureInstaller(SignatureRepository repository, Scanner s
             throw new InvalidDataException("Signature file changed. Open it again and review before deleting.");
         store?.Audit("SIGNATURE_DELETION | Confirmed");
         File.Delete(SavedPath(request.FileName));
+        repository.Invalidate();
         _pending.Clear();
         var snapshot = repository.Load();
         scanner.Reevaluate(snapshot.Rules, transaction);
         store?.Audit($"SIGNATURE_DELETED | Rules={snapshot.Rules.Count}");
         return snapshot;
     }
-    private string Fingerprint()
+    private string Fingerprint(string signatureRevision)
     {
-        var files = Directory.GetFiles(repository.DirectoryPath, "*.json").Order(StringComparer.Ordinal).Select(f => Path.GetFileName(f) + File.ReadAllText(f));
-        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(string.Join("\n", files) + JsonSerializer.Serialize(scanner.Unmatched) + JsonSerializer.Serialize(options) + scanner.Repository.Fingerprint())));
+        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(signatureRevision + JsonSerializer.Serialize(scanner.Unmatched) + JsonSerializer.Serialize(options) + scanner.Repository.Fingerprint())));
     }
     private SignaturePack Validate(string json, SignatureSnapshot current)
     {
@@ -87,13 +78,15 @@ public sealed class SignatureInstaller(SignatureRepository repository, Scanner s
         if (Path.GetFileName(fileName) != fileName || !System.Text.RegularExpressions.Regex.IsMatch(fileName, @"^[a-zA-Z0-9][a-zA-Z0-9._-]{0,100}\.json$") || File.Exists(Path.Combine(repository.DirectoryPath, fileName)))
             throw new InvalidDataException("Use a new JSON file name containing letters, digits, dots, hyphens or underscores.");
         scanner.Refresh(true);
-        var fingerprint = Fingerprint();
-        var current = repository.Load(); var pack = Validate(json, current);
+        var current = repository.Load();
+        var fingerprint = Fingerprint(current.Revision);
+        var pack = Validate(json, current);
         var classifier = new SpamClassifier(options); var rules = current.Rules.Concat(pack.Signatures).ToArray();
         var newSpam = scanner.Unmatched.Where(x => classifier.Classify(x.Message, rules).Classification == Classification.Spam).ToArray();
         foreach (var old in _pending.Where(x => x.Value.Expires < DateTimeOffset.UtcNow).Select(x => x.Key).ToArray()) _pending.Remove(old);
         if (_pending.Count >= 20) throw new InvalidDataException("Too many pending previews. Cancel an existing preview.");
-        if (fingerprint != Fingerprint()) throw new InvalidDataException("Messages or signatures changed during preview. Upload again.");
+        var verified = repository.Load();
+        if (verified.Errors.Count > 0 || fingerprint != Fingerprint(verified.Revision)) throw new InvalidDataException("Messages or signatures changed during preview. Upload again.");
         var token = Guid.NewGuid().ToString("N"); _pending[token] = new(fileName, json, fingerprint, DateTimeOffset.UtcNow.AddMinutes(15));
         return new(token, fileName, pack.Signatures.Count, pack.Signatures.Sum(x => Count(x.When)), scanner.Unmatched.Count, newSpam.Length, scanner.Unmatched.Count - newSpam.Length, newSpam.Select(x => x.Message.Subject).ToArray(),
             scanner.AccountViews.Where(a => a.Enabled).Select(a =>
@@ -110,13 +103,15 @@ public sealed class SignatureInstaller(SignatureRepository repository, Scanner s
         using var transaction = scanner.Repository.Begin();
         scanner.Refresh(true);
         if (!_pending.Remove(token, out var pending) || pending.Expires < DateTimeOffset.UtcNow) throw new InvalidDataException("Preview expired. Upload and preview again.");
-        if (pending.Fingerprint != Fingerprint()) throw new InvalidDataException("Messages or signatures changed. Upload and preview again before confirming.");
-        _ = Validate(pending.Json, repository.Load());
+        var current = repository.Load();
+        if (current.Errors.Count > 0 || pending.Fingerprint != Fingerprint(current.Revision)) throw new InvalidDataException("Messages or signatures changed. Upload and preview again before confirming.");
+        _ = Validate(pending.Json, current);
         store?.Audit("SIGNATURE_ACTIVATION | Confirmed");
         var destination = Path.Combine(repository.DirectoryPath, pending.FileName);
         var temp = Path.Combine(repository.DirectoryPath, Guid.NewGuid() + ".tmp");
         try { File.WriteAllText(temp, pending.Json); File.Move(temp, destination, false); }
         finally { if (File.Exists(temp)) File.Delete(temp); }
+        repository.Invalidate();
         var snapshot = repository.Load();
         if (snapshot.Errors.Count > 0) throw new InvalidDataException("Signature repository changed during activation; scoring is disabled.");
         scanner.Reevaluate(snapshot.Rules, transaction); store?.Audit($"SIGNATURE_ACTIVATED | Rules={snapshot.Rules.Count}"); return snapshot;

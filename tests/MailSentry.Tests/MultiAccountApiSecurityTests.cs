@@ -63,7 +63,15 @@ public class MultiAccountApiSecurityTests
             response = await http.GetAsync("/api/status"); Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.Contains("no-store", response.Headers.CacheControl!.ToString()); Assert.True(response.Headers.Contains("Content-Security-Policy"));
             var status = await response.Content.ReadAsStringAsync();
-            using (var parsedStatus = JsonDocument.Parse(status)) Assert.True(parsedStatus.RootElement.GetProperty("dryRun").GetBoolean());
+            using (var parsedStatus = JsonDocument.Parse(status))
+            {
+                Assert.True(parsedStatus.RootElement.GetProperty("dryRun").GetBoolean());
+                var signatures = parsedStatus.RootElement.GetProperty("signatures");
+                Assert.Equal(1, signatures.GetProperty("count").GetInt32());
+                Assert.False(signatures.TryGetProperty("rules", out _));
+                Assert.Equal(64, signatures.GetProperty("revision").GetString()!.Length);
+                Assert.Equal("shared.json", Assert.Single(signatures.GetProperty("files").EnumerateArray()).GetString());
+            }
             foreach (var privateValue in new[] { "HomeAccountId", "homeAccountId", "AuthenticationRecord", "authenticationRecord", "graph-a.tenant", "a.tenant", "synthetic-token-never-log" }) Assert.DoesNotContain(privateValue, status);
             Assert.Equal(HttpStatusCode.BadRequest, (await http.PostAsync($"/api/accounts/{a}/enabled", Json("{\"enabled\":false}"))).StatusCode);
             Assert.True(f.Accounts.Get(a).Account.Enabled);

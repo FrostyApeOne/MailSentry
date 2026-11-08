@@ -72,6 +72,7 @@ try
     app.MapGet("/api/status", () =>
     {
         scanner.Refresh();
+        var signatureSummary = signatures.GetSummary();
         return new
         {
             provider = "Microsoft Outlook",
@@ -83,8 +84,8 @@ try
             lastRun = scanner.LastRun,
             error = scanner.Error,
             dryRun = options.DryRun,
-            signatures = signatures.Load(),
-            signatureFiles = installer.FileNames(),
+            signatures = signatureSummary,
+            signatureFiles = signatureSummary.Files,
             unmatched = scanner.Unmatched.Count
         };
     });

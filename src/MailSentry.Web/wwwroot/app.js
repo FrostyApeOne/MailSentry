@@ -68,7 +68,7 @@ async function status() {
   $('stats').replaceChildren(); const x = s.lastScan;
   for (const [name, value] of [['Scanner', s.scanner], ['Mailboxes', s.accounts.length], ['Connected', s.accounts.filter(a => a.authentication === 'Connected').length],
     ['Authentication needed', s.accounts.filter(a => a.authentication === 'Authentication required').length], ['Last scan outcome', s.lastRun?.outcome || 'Never'],
-    ['Scanned', x?.scanned ?? 0], ['Spam matched', x?.spam ?? 0], ['Unmatched', s.unmatched], ['Signatures', s.signatures.rules.length]]) {
+    ['Scanned', x?.scanned ?? 0], ['Spam matched', x?.spam ?? 0], ['Unmatched', s.unmatched], ['Signatures', s.signatures.count]]) {
     const box = el('div', name); box.className = 'stat'; box.append(el('strong', value)); $('stats').append(box);
   }
   $('signatureList').replaceChildren(...s.signatureFiles.map(fileName => {
